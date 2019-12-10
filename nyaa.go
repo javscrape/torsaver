@@ -26,6 +26,19 @@ type nyaa struct {
 	P        string
 }
 
+func (n nyaa) SaveAll(path string) (e error) {
+	for i := range n.torrents {
+		if int64(i) >= n.limit {
+			return nil
+		}
+		e := n.Save(i, path)
+		if e != nil {
+			return e
+		}
+	}
+	return nil
+}
+
 func (n nyaa) Save(idx int, path string) (e error) {
 	size := len(n.torrents)
 	if idx >= size {
@@ -41,16 +54,16 @@ func (n nyaa) Save(idx int, path string) (e error) {
 	if e != nil {
 		return Wrap(e, "read all")
 	}
-	e = ioutil.WriteFile(filepath.Join(path, t.ID, "data.torrent"), all, 0755)
+	e = ioutil.WriteFile(filepath.Join(path, t.ID+".torrent"), all, 0755)
 	if e != nil {
 		return Wrap(e, "write file")
 	}
-	marshal, e := json.Marshal(t)
+	marshal, e := json.MarshalIndent(t, "", " ")
 	if e != nil {
 		return Wrap(e, "save")
 	}
 
-	return ioutil.WriteFile(path, marshal, 0755)
+	return ioutil.WriteFile(filepath.Join(path, t.ID+".json"), marshal, 0755)
 }
 
 func (n nyaa) List() (l []string) {
@@ -133,7 +146,7 @@ func decodeNyaa(sel *goquery.Selection) *NyaaTorrent {
 func NewNyaa() Saver {
 	return &nyaa{
 		torrents: nil,
-		limit:    50,
+		limit:    5,
 		Name:     "",
 		User:     "",
 		F:        "",
