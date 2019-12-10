@@ -11,6 +11,10 @@ import (
 
 var useCache bool = false
 
+func init() {
+	RegisterCache()
+}
+
 func RegisterCache() {
 	cacher.Register(cache.New())
 	useCache = true
