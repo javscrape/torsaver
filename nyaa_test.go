@@ -35,3 +35,50 @@ func TestNewNyaa(t *testing.T) {
 		})
 	}
 }
+
+func Test_nyaa_Save(t *testing.T) {
+	type fields struct {
+		torrents []*NyaaTorrent
+		limit    int64
+		Name     string
+		User     string
+		F        string
+		C        string
+		Q        string
+		S        string
+		O        string
+		P        string
+	}
+	type args struct {
+		idx  int
+		path string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name:   "",
+			fields: fields{},
+			args: args{
+				idx:  0,
+				path: "d:\\torrent\\temp\\",
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			n := NewNyaa()
+			err := n.Find("FC2")
+			if err != nil {
+				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if err := n.Save(tt.args.idx, tt.args.path); (err != nil) != tt.wantErr {
+				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
