@@ -16,18 +16,21 @@ func RegisterCache() {
 	useCache = true
 }
 
-func Get(url string) (e error) {
+func Get(url string) (data []byte, e error) {
 	name := Hash(url)
 	get, e := http.Get(url)
 	if e != nil {
-		return e
+		return nil, Wrap(e, "httget")
 	}
 	bys, e := ioutil.ReadAll(get.Body)
-
-	err := cacher.Set(name, bys)
-	if err != nil {
-		return
+	if e != nil {
+		return nil, Wrap(e, "readall")
 	}
+	e = cacher.Set(name, bys)
+	if e != nil {
+		return nil, Wrap(e, "cache")
+	}
+	return bys, nil
 }
 
 // Hash ...
