@@ -6,7 +6,6 @@ import (
 	cache "github.com/gocacher/badger-cache/v2"
 	"github.com/gocacher/cacher"
 	"io/ioutil"
-	"net/http"
 )
 
 var useCache bool = false
@@ -21,8 +20,9 @@ func RegisterCache() {
 }
 
 func Get(url string) (data []byte, e error) {
+	fmt.Println("url", url)
 	name := Hash(url)
-	get, e := http.Get(url)
+	get, e := cli.Get(url)
 	if e != nil {
 		return nil, Wrap(e, "httget")
 	}
