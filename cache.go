@@ -5,6 +5,7 @@ import (
 	"fmt"
 	cache "github.com/gocacher/badger-cache/v2"
 	"github.com/gocacher/cacher"
+	"github.com/goextension/log"
 	"io/ioutil"
 )
 
@@ -20,21 +21,27 @@ func RegisterCache() {
 }
 
 func Get(url string) (data []byte, e error) {
-	fmt.Println("url", url)
+	log.Infow("get", "url", url)
 	name := Hash(url)
+	if useCache {
+		data, e = cacher.Get(name)
+		if e == nil {
+			return
+		}
+	}
 	get, e := cli.Get(url)
 	if e != nil {
 		return nil, Wrap(e, "httget")
 	}
-	bys, e := ioutil.ReadAll(get.Body)
+	data, e = ioutil.ReadAll(get.Body)
 	if e != nil {
 		return nil, Wrap(e, "readall")
 	}
-	e = cacher.Set(name, bys)
+	e = cacher.Set(name, data)
 	if e != nil {
 		return nil, Wrap(e, "cache")
 	}
-	return bys, nil
+	return
 }
 
 // Hash ...
