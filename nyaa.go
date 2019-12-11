@@ -179,8 +179,8 @@ func (n Nyaa) URL() string {
 }
 
 // NewNyaa ...
-func NewNyaa() Saver {
-	return &Nyaa{
+func NewNyaa(opts ...NyaaOption) Saver {
+	n := &Nyaa{
 		torrents: nil,
 		limit:    50,
 		Name:     "",
@@ -192,4 +192,8 @@ func NewNyaa() Saver {
 		O:        "",
 		P:        "1",
 	}
+	for _, opt := range opts {
+		opt(n)
+	}
+	return n
 }

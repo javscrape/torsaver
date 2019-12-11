@@ -11,6 +11,7 @@ func init() {
 	}
 }
 
+// TestNewNyaa ...
 func TestNewNyaa(t *testing.T) {
 	tests := []struct {
 		name string
@@ -36,6 +37,7 @@ func TestNewNyaa(t *testing.T) {
 	}
 }
 
+// Test_nyaa_Save ...
 func Test_nyaa_Save(t *testing.T) {
 	type fields struct {
 		torrents []*NyaaTorrent
@@ -83,6 +85,7 @@ func Test_nyaa_Save(t *testing.T) {
 	}
 }
 
+// Test_nyaa_SaveAll ...
 func Test_nyaa_SaveAll(t *testing.T) {
 	type fields struct {
 		torrents []*NyaaTorrent
@@ -116,8 +119,10 @@ func Test_nyaa_SaveAll(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			n := NewNyaa()
-			err := n.Find("FC2")
+			n := NewNyaa(func(nyaa *Nyaa) {
+				nyaa.User = "NewDragon"
+			})
+			err := n.Find("")
 			if err != nil {
 				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
 			}
