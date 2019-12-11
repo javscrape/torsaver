@@ -46,7 +46,7 @@ func (n nyaa) Save(idx int, path string) (e error) {
 	}
 
 	t := n.torrents[idx]
-	get, e := cli.Get(t.File)
+	get, e := cli.Get(DefaultNYAAURL + t.File)
 	if e != nil {
 		return Wrap(e, "cli get")
 	}
@@ -146,7 +146,7 @@ func decodeNyaa(sel *goquery.Selection) *NyaaTorrent {
 func NewNyaa() Saver {
 	return &nyaa{
 		torrents: nil,
-		limit:    5,
+		limit:    50,
 		Name:     "",
 		User:     "",
 		F:        "",
