@@ -9,17 +9,19 @@ import (
 	"io/ioutil"
 )
 
-var useCache bool = false
+var useCache = false
 
 func init() {
 	RegisterCache()
 }
 
+// RegisterCache ...
 func RegisterCache() {
 	cacher.Register(cache.New())
 	useCache = true
 }
 
+// Get ...
 func Get(url string) (data []byte, e error) {
 	log.Infow("get", "url", url)
 	name := Hash(url)
