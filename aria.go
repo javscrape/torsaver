@@ -16,7 +16,7 @@ var DefaultAriaSecret = ""
 // DefaultTimeOutSecond ...
 var DefaultTimeOutSecond time.Duration = 3
 
-// NewRPCClinet ...
-func NewRPCClinet(ctx context.Context) (cli rpc.Client, e error) {
+// NewRPCClient ...
+func NewRPCClient(ctx context.Context) (cli rpc.Client, e error) {
 	return rpc.New(ctx, DefaultAriaRPC, DefaultAriaSecret, DefaultTimeOutSecond*time.Second, nil)
 }

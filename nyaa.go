@@ -5,14 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/goextension/log"
+	"github.com/zyxar/argo/rpc"
 	"io/ioutil"
-	"net/rpc"
 	"path/filepath"
 	"strings"
 )
 
 // DefaultNYAAURL ...
 var DefaultNYAAURL = `https://sukebei.nyaa.si`
+
+// DefaultSavePath ...
+var DefaultSavePath = "tmp"
 
 // NyaaOption ...
 type NyaaOption func(nyaa *Nyaa)
@@ -34,9 +38,10 @@ type NyaaTorrent struct {
 
 // Nyaa ...
 type Nyaa struct {
-	aria     *rpc.Client
 	torrents []*NyaaTorrent
 	limit    int64
+	path     string
+	Aria     rpc.Client
 	Name     string
 	User     string //user:NewDragon,offkab
 	F        string
@@ -47,13 +52,44 @@ type Nyaa struct {
 	P        string
 }
 
+// Download ...
+func (n Nyaa) Download(idx int) (e error) {
+	size := len(n.torrents)
+	if idx >= size {
+		return fmt.Errorf("index(%d) is over than size(%d)", idx, size)
+	}
+
+	t := n.torrents[idx]
+	torrent, e := n.Aria.AddTorrent(filepath.Join(n.path, t.ID+".torrent"))
+	if e != nil {
+		return Wrap(e, "download add")
+	}
+	log.Infow("download", "name", t.Name, "tid", torrent)
+	return nil
+}
+
+// DownloadAll ...
+func (n Nyaa) DownloadAll() (e error) {
+	for idx := range n.torrents {
+		e = n.Save(idx)
+		if e != nil {
+			return Wrap(e, "download save")
+		}
+		e = n.Download(idx)
+		if e != nil {
+			return Wrap(e, "download down")
+		}
+	}
+	return nil
+}
+
 // SaveAll ...
-func (n Nyaa) SaveAll(path string) (e error) {
+func (n Nyaa) SaveAll() (e error) {
 	for i := range n.torrents {
 		if int64(i) >= n.limit {
 			return nil
 		}
-		e := n.Save(i, path)
+		e := n.Save(i)
 		if e != nil {
 			return e
 		}
@@ -62,7 +98,7 @@ func (n Nyaa) SaveAll(path string) (e error) {
 }
 
 // Save ...
-func (n Nyaa) Save(idx int, path string) (e error) {
+func (n Nyaa) Save(idx int) (e error) {
 	size := len(n.torrents)
 	if idx >= size {
 		return fmt.Errorf("index(%d) is over than size(%d)", idx, size)
@@ -77,7 +113,7 @@ func (n Nyaa) Save(idx int, path string) (e error) {
 	if e != nil {
 		return Wrap(e, "read all")
 	}
-	e = ioutil.WriteFile(filepath.Join(path, t.ID+".torrent"), all, 0755)
+	e = ioutil.WriteFile(filepath.Join(n.path, t.ID+".torrent"), all, 0755)
 	if e != nil {
 		return Wrap(e, "write file")
 	}
@@ -86,7 +122,7 @@ func (n Nyaa) Save(idx int, path string) (e error) {
 		return Wrap(e, "save")
 	}
 
-	return ioutil.WriteFile(filepath.Join(path, t.ID+".json"), marshal, 0755)
+	return ioutil.WriteFile(filepath.Join(n.path, t.ID+".json"), marshal, 0755)
 }
 
 // List ...
@@ -105,7 +141,7 @@ func (n *Nyaa) Limit(i int64) {
 // Find ...
 func (n *Nyaa) Find(name string) error {
 	n.Name = name
-	get, err := Get(n.URL())
+	get, err := Get(n.url())
 	if err != nil {
 		return err
 	}
@@ -169,8 +205,7 @@ func decodeNyaa(sel *goquery.Selection) *NyaaTorrent {
 	return &tor
 }
 
-// URL ...
-func (n Nyaa) URL() string {
+func (n Nyaa) url() string {
 	url := DefaultNYAAURL
 	if n.User != "" {
 		url = strings.Join([]string{DefaultNYAAURL, "user", n.User}, "/")
@@ -188,6 +223,8 @@ func NewNyaa(opts ...NyaaOption) Saver {
 	n := &Nyaa{
 		torrents: nil,
 		limit:    50,
+		path:     DefaultSavePath,
+		Aria:     nil,
 		Name:     "",
 		User:     "",
 		F:        "",
