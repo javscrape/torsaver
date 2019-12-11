@@ -13,14 +13,27 @@ import (
 // DefaultNYAAURL ...
 var DefaultNYAAURL = `https://sukebei.nyaa.si`
 
-//DefaultNYAAUser user:NewDragon,offkab
-var DefaultNYAAUser = `offkab`
+// NyaaTorrent ...
+type NyaaTorrent struct {
+	ID        string
+	Link      string
+	Category  string
+	Name      string
+	File      string
+	Magnet    string
+	Size      string
+	Date      string
+	Seeders   string
+	Leechers  string
+	Downloads string
+}
 
-type nyaa struct {
+// Nyaa ...
+type Nyaa struct {
 	torrents []*NyaaTorrent
 	limit    int64
 	Name     string
-	User     string
+	User     string //user:NewDragon,offkab
 	F        string
 	C        string
 	Q        string
@@ -30,7 +43,7 @@ type nyaa struct {
 }
 
 // SaveAll ...
-func (n nyaa) SaveAll(path string) (e error) {
+func (n Nyaa) SaveAll(path string) (e error) {
 	for i := range n.torrents {
 		if int64(i) >= n.limit {
 			return nil
@@ -44,7 +57,7 @@ func (n nyaa) SaveAll(path string) (e error) {
 }
 
 // Save ...
-func (n nyaa) Save(idx int, path string) (e error) {
+func (n Nyaa) Save(idx int, path string) (e error) {
 	size := len(n.torrents)
 	if idx >= size {
 		return fmt.Errorf("index(%d) is over than size(%d)", idx, size)
@@ -72,7 +85,7 @@ func (n nyaa) Save(idx int, path string) (e error) {
 }
 
 // List ...
-func (n nyaa) List() (l []string) {
+func (n Nyaa) List() (l []string) {
 	for _, t := range n.torrents {
 		l = append(l, t.Name)
 	}
@@ -80,12 +93,12 @@ func (n nyaa) List() (l []string) {
 }
 
 // Limit ...
-func (n *nyaa) Limit(i int64) {
+func (n *Nyaa) Limit(i int64) {
 	n.limit = i
 }
 
 // Find ...
-func (n *nyaa) Find(name string) error {
+func (n *Nyaa) Find(name string) error {
 	n.Name = name
 	get, err := Get(n.URL())
 	if err != nil {
@@ -151,25 +164,13 @@ func decodeNyaa(sel *goquery.Selection) *NyaaTorrent {
 	return &tor
 }
 
-// NewNyaa ...
-func NewNyaa() Saver {
-	return &nyaa{
-		torrents: nil,
-		limit:    50,
-		Name:     "",
-		User:     "",
-		F:        "",
-		C:        "2_2",
-		Q:        "",
-		S:        "",
-		O:        "",
-		P:        "1",
-	}
-}
-
 // URL ...
-func (n nyaa) URL() string {
-	url := strings.Join([]string{DefaultNYAAURL, "user", DefaultNYAAUser}, "/")
+func (n Nyaa) URL() string {
+	url := DefaultNYAAURL
+	if n.User != "" {
+		url = strings.Join([]string{DefaultNYAAURL, "user", n.User}, "/")
+	}
+
 	args := fmt.Sprintf("f=0&c=2_2&q=%s&s=id&o=desc&p=%s", n.Name, n.P)
 
 	return strings.Join([]string{url, args}, "?")
@@ -177,17 +178,18 @@ func (n nyaa) URL() string {
 	//args := strings.Join([]string{}, "&")
 }
 
-// NyaaTorrent ...
-type NyaaTorrent struct {
-	ID        string
-	Link      string
-	Category  string
-	Name      string
-	File      string
-	Magnet    string
-	Size      string
-	Date      string
-	Seeders   string
-	Leechers  string
-	Downloads string
+// NewNyaa ...
+func NewNyaa() Saver {
+	return &Nyaa{
+		torrents: nil,
+		limit:    50,
+		Name:     "",
+		User:     "",
+		F:        "",
+		C:        "2_2", //video args
+		Q:        "",
+		S:        "",
+		O:        "",
+		P:        "1",
+	}
 }
