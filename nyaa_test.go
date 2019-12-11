@@ -3,6 +3,7 @@ package torsaver
 import (
 	"context"
 	"github.com/zyxar/argo/rpc"
+	"path/filepath"
 	"testing"
 )
 
@@ -165,6 +166,7 @@ func TestNyaa_DownloadAll(t *testing.T) {
 	}{
 		{},
 	}
+	DefaultSavePath, _ = filepath.Abs("tmp")
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			n := NewNyaa(func(nyaa *Nyaa) {
