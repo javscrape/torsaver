@@ -6,12 +6,16 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
+	"net/rpc"
 	"path/filepath"
 	"strings"
 )
 
 // DefaultNYAAURL ...
 var DefaultNYAAURL = `https://sukebei.nyaa.si`
+
+// NyaaOption ...
+type NyaaOption func(nyaa *Nyaa)
 
 // NyaaTorrent ...
 type NyaaTorrent struct {
@@ -30,6 +34,7 @@ type NyaaTorrent struct {
 
 // Nyaa ...
 type Nyaa struct {
+	aria     *rpc.Client
 	torrents []*NyaaTorrent
 	limit    int64
 	Name     string

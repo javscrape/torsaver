@@ -8,6 +8,3 @@ type Saver interface {
 	SaveAll(path string) (e error)
 	List() []string
 }
-
-// NyaaOption ...
-type NyaaOption func(nyaa *Nyaa)
