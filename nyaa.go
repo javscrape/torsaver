@@ -154,13 +154,13 @@ func NewNyaa() Saver {
 		Q:        "",
 		S:        "",
 		O:        "",
-		P:        "",
+		P:        "1",
 	}
 }
 
 func (n nyaa) URL() string {
 	url := strings.Join([]string{DefaultNYAAURL, "user", DefaultNYAAUser}, "/")
-	args := fmt.Sprintf("f=0&c=0_0&q=%s&s=id&o=desc&p=1", n.Name)
+	args := fmt.Sprintf("f=0&c=0_0&q=%s&s=id&o=desc&p=%s", n.Name, n.P)
 
 	return strings.Join([]string{url, args}, "?")
 	//todo:
