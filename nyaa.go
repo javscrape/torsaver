@@ -42,14 +42,13 @@ type Nyaa struct {
 	limit    int64
 	path     string
 	Aria     rpc.Client
-	Name     string
 	User     string //user:NewDragon,offkab
 	F        string
-	C        string
-	Q        string
-	S        string
-	O        string
-	P        string
+	Category string
+	Query    string
+	Sort     string
+	Order    string
+	Page     string
 }
 
 // Download ...
@@ -140,7 +139,7 @@ func (n *Nyaa) Limit(i int64) {
 
 // Find ...
 func (n *Nyaa) Find(name string) error {
-	n.Name = name
+	n.Query = name
 	get, err := Get(n.url())
 	if err != nil {
 		return err
@@ -211,7 +210,7 @@ func (n Nyaa) url() string {
 		url = strings.Join([]string{DefaultNYAAURL, "user", n.User}, "/")
 	}
 
-	args := fmt.Sprintf("f=0&c=2_2&q=%s&s=id&o=desc&p=%s", n.Name, n.P)
+	args := fmt.Sprintf("f=0&c=%v&q=%v&s=%v&o=%v&p=%v", n.Category, n.Query, n.Sort, n.Order, n.Page)
 
 	return strings.Join([]string{url, args}, "?")
 	//todo:
@@ -225,14 +224,13 @@ func NewNyaa(opts ...NyaaOption) Saver {
 		limit:    50,
 		path:     DefaultSavePath,
 		Aria:     nil,
-		Name:     "",
 		User:     "",
 		F:        "",
-		C:        "2_2", //video args
-		Q:        "",
-		S:        "",
-		O:        "",
-		P:        "1",
+		Category: "2_2", //video(2_2) args
+		Query:    "",
+		Sort:     "id",
+		Order:    "desc",
+		Page:     "1",
 	}
 	for _, opt := range opts {
 		opt(n)
