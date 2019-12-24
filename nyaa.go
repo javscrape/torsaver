@@ -39,7 +39,7 @@ type NyaaTorrent struct {
 // Nyaa ...
 type Nyaa struct {
 	torrents []*NyaaTorrent
-	limit    int64
+	limit    int
 	path     string
 	Aria     rpc.Client
 	User     string //user:NewDragon,offkab
@@ -93,7 +93,7 @@ func (n Nyaa) DownloadAll() (e error) {
 // SaveAll ...
 func (n Nyaa) SaveAll() (e error) {
 	for i := range n.torrents {
-		if int64(i) >= n.limit {
+		if i >= n.limit {
 			return nil
 		}
 		e := n.Save(i)
@@ -141,30 +141,32 @@ func (n Nyaa) List() (l []string) {
 }
 
 // Limit ...
-func (n *Nyaa) Limit(i int64) {
+func (n *Nyaa) Limit(i int) {
 	n.limit = i
 }
 
 // Find ...
 func (n *Nyaa) Find(name string) error {
 	n.Query = name
-	get, err := Get(n.url())
-	if err != nil {
-		return err
+	for len(n.torrents) < n.limit {
+		get, err := Get(n.url())
+		if err != nil {
+			return err
+		}
+		reader, err := goquery.NewDocumentFromReader(bytes.NewReader(get))
+		if err != nil {
+			return err
+		}
+		n.torrents = append(n.torrents, findSub(reader, n.limit-len(n.torrents))...)
+		n.SetPage(n.Page + 1)
 	}
-	reader, err := goquery.NewDocumentFromReader(bytes.NewReader(get))
-	if err != nil {
-		return err
-	}
-	n.torrents = findSub(reader, n.limit)
-
 	return nil
 }
 
-func findSub(document *goquery.Document, limit int64) []*NyaaTorrent {
+func findSub(document *goquery.Document, limit int) []*NyaaTorrent {
 	var result []*NyaaTorrent
 	document.Find("table > tbody > tr").Each(func(i int, selection *goquery.Selection) {
-		if int64(i) >= limit {
+		if i >= limit {
 			return
 		}
 		result = append(result, decodeNyaa(selection))
@@ -221,8 +223,6 @@ func (n Nyaa) url() string {
 	args := fmt.Sprintf("f=0&c=%v&q=%v&s=%v&o=%v&p=%v", n.Category, n.Query, n.Sort, n.Order, n.Page)
 
 	return strings.Join([]string{url, args}, "?")
-	//todo:
-	//args := strings.Join([]string{}, "&")
 }
 
 // NewNyaa ...

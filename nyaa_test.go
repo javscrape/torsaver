@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	err := RegisterProxy("socks5://127.0.0.1:10808")
+	err := RegisterProxy("socks5://127.0.0.1:1080")
 	if err != nil {
 		panic(err)
 	}
@@ -178,6 +178,7 @@ func TestNyaa_DownloadAll(t *testing.T) {
 					panic(e)
 				}
 			})
+			n.Limit(100)
 			err := n.Find("FHD")
 			if err != nil {
 				t.Errorf("DownloadAll() error = %v, wantErr %v", err, tt.wantErr)
