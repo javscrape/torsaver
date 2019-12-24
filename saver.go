@@ -2,7 +2,7 @@ package torsaver
 
 // Saver ...
 type Saver interface {
-	Limit(i int64)
+	Limit(i int)
 	CurrentPage() int
 	SetPage(int)
 	Find(name string) (e error)
