@@ -48,7 +48,15 @@ type Nyaa struct {
 	Query    string
 	Sort     string
 	Order    string
-	Page     string
+	Page     int
+}
+
+func (n Nyaa) CurrentPage() int {
+	return n.Page
+}
+
+func (n *Nyaa) SetPage(p int) {
+	n.Page = p
 }
 
 // Download ...
@@ -228,9 +236,9 @@ func NewNyaa(opts ...NyaaOption) Saver {
 		F:        "",
 		Category: "2_2", //video(2_2) args
 		Query:    "",
-		Sort:     "id",
+		Sort:     "seeders",
 		Order:    "desc",
-		Page:     "1",
+		Page:     1,
 	}
 	for _, opt := range opts {
 		opt(n)
